@@ -173,7 +173,7 @@ class LwF(nn.Module):
                 
                 for inputs, labels, indexes in val_loader:
                     
-                       inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+                       inputs, indexes = inputs.to(DEVICE), indexes.to(DEVICE)
                        seen_labels = torch.LongTensor([class_map[label] for label in labels.numpy()])
                        labels = Variable(seen_labels).to(DEVICE)
                        labels_hot=torch.eye(self.n_classes)[labels]
