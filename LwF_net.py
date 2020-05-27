@@ -180,10 +180,10 @@ class LwF(nn.Module):
                        labels_hot = labels_hot.to(DEVICE)
                        out = self(inputs)
                         
-                        if self.n_known <= 0:
+                       if self.n_known <= 0:
                             
                                 val_loss = self.cls_loss(out, labels_hot)
-                        else:
+                       else:
                                 q_val_i = q_val[indexes]
                                 target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
                                 val_loss += self.dist_loss(out, target).item()
