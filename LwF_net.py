@@ -191,7 +191,7 @@ class LwF(nn.Module):
                                 
                 self.train(True) 
                                 
-            avg_val_loss = val_loss / float(len(val_dataloader.dataset))
+            avg_val_loss = val_loss / float(len(val_loader.dataset))
             
                         
             ''' accuracy = validate(self, val_loader, map_reverse)
