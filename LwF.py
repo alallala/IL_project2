@@ -27,6 +27,7 @@ MEMORY_SIZE = 2000
 
 def main():
 
+    total_classes = 100 
     range_classes = np.arange(100)
     classes_groups = np.array_split(range_classes, 10)
     
