@@ -173,6 +173,7 @@ class LwF(nn.Module):
                 
                 for inputs, labels, indexes in val_loader:
                     
+                       net.train(False)
                        inputs, indexes = inputs.to(DEVICE), indexes.to(DEVICE)
                        seen_labels = torch.LongTensor([class_map[label] for label in labels.numpy()])
                        labels = Variable(seen_labels).to(DEVICE)
@@ -187,6 +188,8 @@ class LwF(nn.Module):
                                 q_val_i = q_val[indexes]
                                 target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
                                 val_loss += self.dist_loss(out, target).item()
+                                
+                 net.train(True) 
                                 
             avg_val_loss = val_loss / float(len(val_dataloader.dataset))
             
