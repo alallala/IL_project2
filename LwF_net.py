@@ -190,7 +190,7 @@ class LwF(nn.Module):
                                 
                 self.train(True) 
                                 
-                avg_val_loss = val_loss / float(len(val_loader.dataset))
+                #avg_val_loss = val_loss / float(len(val_loader.dataset))
             
                         
             ''' accuracy = validate(self, val_loader, map_reverse)
@@ -201,12 +201,12 @@ class LwF(nn.Module):
                 best_net = copy.deepcopy(self.state_dict()) '''
             
             if min_val_loss is None:
-                min_val_loss = avg_val_loss
+                min_val_loss = val_loss
                 best_net = copy.deepcopy(self.state_dict())
             else:
-                if avg_val_loss < min_val_loss:
+                if val_loss < min_val_loss:
                     best_epoch = epoch
-                    min_val_loss = avg_val_loss
+                    min_val_loss = val_loss
                     best_net = copy.deepcopy(self.state_dict())
 
             if i % 10 == 0 or i == (NUM_EPOCHS-1):
