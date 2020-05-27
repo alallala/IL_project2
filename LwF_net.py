@@ -189,7 +189,7 @@ class LwF(nn.Module):
                                 target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
                                 val_loss += self.dist_loss(out, target).item()
                                 
-                 net.train(True) 
+                net.train(True) 
                                 
             avg_val_loss = val_loss / float(len(val_dataloader.dataset))
             
