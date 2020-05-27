@@ -91,6 +91,8 @@ class LwF(nn.Module):
             #self.features_extractor.to(DEVICE)
             #self.features_extractor.train(False)
             q = torch.zeros(len(dataset), self.n_classes).cuda()
+            q_val = torch.zeros(len(val_dataset), self.n_classes).cuda()
+            
             for images, labels, indexes in loader:
                 images = Variable(images).cuda()
                 indexes = indexes.cuda()
@@ -99,9 +101,19 @@ class LwF(nn.Module):
                 #g = self.forward(images)
                 q[indexes] = g.data
             q = Variable(q).cuda()
+            
+         
+            for images,labels,indexes in val_dataloader:
+                images = Variable(images).cuda()
+                indexes = indexes.cuda()
+                self.features_extractor.train(False)
+                g_val = torch.sigmoid(self.features_extractor.forward(images))
+                #g = self.forward(images)
+                q_val[indexes] = g_val.data
+            q_val = Variable(q_val).cuda()
+            
             self.features_extractor.train(True)
-
-
+            
         self.add_classes(n)
         #self.n_classes += n
 
@@ -109,14 +121,17 @@ class LwF(nn.Module):
 
         i = 0
 
-        best_acc = -1
+        #best_acc = -1
         best_epoch = 0
-
+        val_loss = 0.0
+        min_val_loss = None
+        
         self.to(DEVICE)
         self.features_extractor.train(True)
         for epoch in range(NUM_EPOCHS):
-
+            
             if epoch in STEPDOWN_EPOCHS:
+         
               for param_group in optimizer.param_groups:
                 param_group['lr'] = param_group['lr']/STEPDOWN_FACTOR
 
@@ -144,39 +159,60 @@ class LwF(nn.Module):
                     loss = self.clf_loss(out, labels_hot)
 
                 else:
+                    
                     #out = torch.sigmoid(out)
                     q_i = q[indexes]
-                    #print('g', g[:,1])
-                    #print('q_i', q_i[:,1])
-                    #controllare dist loss
-                    #print('here?')
-                    #print(out[:, self.n_known])
-                    #print(q_i)
-                    #dist_loss = sum(criterion_dist(logits[:, y], dist_target_i[:, y]) for y in range(self.n_known))
-                    #dist_loss = sum(self.dist_loss(out[:,y], q_i[:,y]) for y in range(self.n_known))
-
-                    #dist_loss = self.dist_loss(out[:, :self.n_known], q_i)
-                    #target = [q_i, labels_hot]
-                    #print('known classe', self.n_known, self.n_classes)
                     target = torch.cat((q_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
-                    loss = self.dist_loss(out, target)
+                    loss += self.dist_loss(out, target)
+                    
+                    
                     #loss += dist_loss
 
                 loss.backward()
                 optimizer.step()
-
-            accuracy = validate(self, val_loader, map_reverse)
+                
+                for inputs, labels, indexes in val_loader:
+                    
+                       inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+                       seen_labels = torch.LongTensor([class_map[label] for label in labels.numpy()])
+                       labels = Variable(seen_labels).to(DEVICE)
+                       labels_hot=torch.eye(self.n_classes)[labels]
+                       labels_hot = labels_hot.to(DEVICE)
+                       out = self(inputs)
+                        
+                        if self.n_known <= 0:
+                            
+                                val_loss = self.cls_loss(out, labels_hot)
+                        else:
+                                q_val_i = q_val[indexes]
+                                target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
+                                val_loss += self.dist_loss(out, target).item()
+                                
+            avg_val_loss = val_loss / float(len(val_dataloader.dataset))
+            
+                        
+            ''' accuracy = validate(self, val_loader, map_reverse)
 
             if accuracy > best_acc:
                 best_acc = accuracy
                 best_epoch = epoch
+                best_net = copy.deepcopy(self.state_dict()) '''
+            
+            if min_val_loss is None:
+                min_val_loss = avg_val_loss
                 best_net = copy.deepcopy(self.state_dict())
+            else:
+                if avg_val_loss < min_val_loss:
+                    best_epoch = epoch
+                    min_val_loss = avg_val_loss
+                    best_net = copy.deepcopy(self.state_dict())
 
             if i % 10 == 0 or i == (NUM_EPOCHS-1):
                 print('Epoch {} Loss:{:.4f}'.format(i, loss.item()))
                 for param_group in optimizer.param_groups:
                   print('Learning rate:{}'.format(param_group['lr']))
-                print('Max Accuracy:{:.4f} (Epoch {})'.format(best_acc, best_epoch))
+                #print('Max Accuracy:{:.4f} (Epoch {})'.format(best_acc, best_epoch))
+                print('Min Validation loss: {:.4f} (Epoch {})'.format(min_val_loss,best_epoch))
                 print('-'*30)
             i+=1
 
