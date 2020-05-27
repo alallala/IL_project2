@@ -27,8 +27,31 @@ MEMORY_SIZE = 2000
 
 def main():
 
-    path='orders/'
-    classes_groups, class_map, map_reverse = utils.get_class_maps_from_files(path+'classgroups1.pickle', path+'map1.pickle', path+'revmap1.pickle')
+    range_classes = np.arange(100)
+    classes_groups = np.array_split(range_classes, 10)
+    
+    perm_id = np.random.permutation(total_classes)
+    all_classes = np.arange(total_classes)
+    
+    # Mix the classes indexes
+    for i in range(len(all_classes)):
+      all_classes[i] = perm_id[all_classes[i]]
+
+    # Create class map
+    class_map = {}
+    #takes 10 new classes randomly
+    for i, cl in enumerate(all_classes):
+        class_map[cl] = i
+    print (f"Class map:{class_map}\n")     
+    
+    # Create class map reversed
+    map_reverse = {}
+    for cl, map_cl in class_map.items():
+        map_reverse[map_cl] = int(cl)
+    print (f"Map Reverse:{map_reverse}\n")
+
+    #path='orders/'
+    #classes_groups, class_map, map_reverse = utils.get_class_maps_from_files(path+'classgroups1.pickle', path+'map1.pickle', path+'revmap1.pickle')
     #print(classes_groups, class_map, map_reverse)
 
 
