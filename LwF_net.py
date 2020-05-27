@@ -182,7 +182,7 @@ class LwF(nn.Module):
                         
                        if self.n_known <= 0:
                             
-                                val_loss = self.cls_loss(out, labels_hot)
+                                val_loss = self.clf_loss(out, labels_hot)
                        else:
                                 q_val_i = q_val[indexes]
                                 target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
