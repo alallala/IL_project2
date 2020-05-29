@@ -106,11 +106,11 @@ class LwF(nn.Module):
             
          
             for images_v,labels_v,indexes_v in val_loader:
-                images = Variable(images_v).cuda()
-                indexes = indexes_v.cuda()
-                g_val = torch.sigmoid(self.features_extractor.forward(images))
+                images_v = Variable(images_v).cuda()
+                indexes_v = indexes_v.cuda()
+                g_val = torch.sigmoid(self.features_extractor.forward(images_v))
                 #g = self.forward(images)
-                q_val[indexes] = g_val.data
+                q_val[indexes_v] = g_val.data
             q_val = Variable(q_val).cuda()
             
             self.features_extractor.train(True)
