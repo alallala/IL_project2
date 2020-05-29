@@ -67,12 +67,12 @@ class LwF(nn.Module):
     def add_classes(self, n):
         in_features = self.features_extractor.fc.in_features
         out_features = self.features_extractor.fc.out_features
-        weight = self.features_extractor.fc.weight.data
-        bias = self.features_extractor.fc.bias.data
+        weight = copy.deepcopy(self.features_extractor.fc.weight.data)
+        bias = copy.deepcopy(self.features_extractor.fc.bias.data)
 
         self.features_extractor.fc = nn.Linear(in_features, out_features+n)
-        self.features_extractor.fc.weight.data[:out_features] = weight
-        self.features_extractor.fc.bias.data[:out_features] = bias
+        self.features_extractor.fc.weight.data[:out_features] = copy.deepcopy(weight)
+        self.features_extractor.fc.bias.data[:out_features] = copy.deepcopy(bias)
 
         self.n_classes += n
 
@@ -87,7 +87,8 @@ class LwF(nn.Module):
             
         loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
         val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=4)
-
+ 
+        self.features_extractor.to(DEVICE)
         if self.n_known > 0:
             #self.features_extractor.to(DEVICE)
             #self.features_extractor.train(False)
@@ -180,15 +181,15 @@ class LwF(nn.Module):
                        labels_v = Variable(seen_labels_v).to(DEVICE)
                        labels_hot_v =torch.eye(self.n_classes)[labels_v]
                        labels_hot_v = labels_hot_v.to(DEVICE)
-                       out = self(inputs_v)
+                       out_v = self(inputs_v)
                         
                        if self.n_known <= 0:
                             
-                                val_loss = self.clf_loss(out, labels_hot_v)
+                                val_loss = self.clf_loss(out_v, labels_hot_v)
                        else:
                                 q_val_i = q_val[indexes_v]
                                 target_v = torch.cat((q_val_i[:, :self.n_known], labels_hot_v[:, self.n_known:self.n_classes]), dim=1)
-                                val_loss += self.dist_loss(out, target_v).item()
+                                val_loss = self.dist_loss(out_v, target_v).item()
                                 
                 self.train(True) 
                                 
