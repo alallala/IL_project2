@@ -176,6 +176,7 @@ class LwF(nn.Module):
                 optimizer.step()
                 self.features_extractor.train(False)
                 self.train(False)
+                val_loss = 0.0
                 for inputs_v, labels_v, indexes_v in val_loader:
                    
                       
