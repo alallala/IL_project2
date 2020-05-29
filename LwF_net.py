@@ -131,6 +131,9 @@ class LwF(nn.Module):
         self.features_extractor.train(True)
         for epoch in range(NUM_EPOCHS):
             
+            val_loss = 0.0
+            min_val_loss = None
+            
             if epoch in STEPDOWN_EPOCHS:
          
               for param_group in optimizer.param_groups:
@@ -172,9 +175,10 @@ class LwF(nn.Module):
                 loss.backward()
                 optimizer.step()
                 self.features_extractor.train(False)
+                self.train(False)
                 for inputs_v, labels_v, indexes_v in val_loader:
                    
-                       self.train(False)
+                      
                        inputs_v, indexes_v = inputs_v.to(DEVICE), indexes_v.to(DEVICE)
                        lebels_v = labels_v.to(DEVICE)
                        seen_labels_v = torch.LongTensor([class_map[label] for label in labels_v.cpu().numpy()])
