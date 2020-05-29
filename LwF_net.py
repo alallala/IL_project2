@@ -174,21 +174,21 @@ class LwF(nn.Module):
                 for inputs_v, labels_v, indexes_v in val_loader:
                    
                        self.train(False)
-                       inputs, indexes = inputs_v.to(DEVICE), indexes_v.to(DEVICE)
-                       lebels = labels_v.to(DEVICE)
-                       seen_labels = torch.LongTensor([class_map[label] for label in labels.cpu().numpy()])
-                       labels = Variable(seen_labels).to(DEVICE)
-                       labels_hot=torch.eye(self.n_classes)[labels]
-                       labels_hot = labels_hot.to(DEVICE)
+                       inputs_v, indexes_v = inputs_v.to(DEVICE), indexes_v.to(DEVICE)
+                       lebels_v = labels_v.to(DEVICE)
+                       seen_labels_v = torch.LongTensor([class_map[label] for label in labels_v.cpu().numpy()])
+                       labels_v = Variable(seen_labels_v).to(DEVICE)
+                       labels_hot_v =torch.eye(self.n_classes)[labels_v]
+                       labels_hot_v = labels_hot_v.to(DEVICE)
                        out = self(inputs)
                         
                        if self.n_known <= 0:
                             
-                                val_loss = self.clf_loss(out, labels_hot)
+                                val_loss = self.clf_loss(out, labels_hot_v)
                        else:
-                                q_val_i = q_val[indexes]
-                                target = torch.cat((q_val_i[:, :self.n_known], labels_hot[:, self.n_known:self.n_classes]), dim=1)
-                                val_loss += self.dist_loss(out, target).item()
+                                q_val_i = q_val[indexes_v]
+                                target_v = torch.cat((q_val_i[:, :self.n_known], labels_hot_v[:, self.n_known:self.n_classes]), dim=1)
+                                val_loss += self.dist_loss(out, target_v).item()
                                 
                 self.train(True) 
                                 
