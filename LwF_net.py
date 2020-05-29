@@ -176,7 +176,7 @@ class LwF(nn.Module):
                        self.train(False)
                        inputs, indexes = inputs_v.to(DEVICE), indexes_v.to(DEVICE)
                        lebels = labels_v.to(DEVICE)
-                       seen_labels = torch.LongTensor([class_map[label] for label in labels.numpy()])
+                       seen_labels = torch.LongTensor([class_map[label] for label in labels.cpu().numpy()])
                        labels = Variable(seen_labels).to(DEVICE)
                        labels_hot=torch.eye(self.n_classes)[labels]
                        labels_hot = labels_hot.to(DEVICE)
