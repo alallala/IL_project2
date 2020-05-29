@@ -171,7 +171,7 @@ class LwF(nn.Module):
 
                 loss.backward()
                 optimizer.step()
-                
+                self.features_extractor.train(False)
                 for inputs_v, labels_v, indexes_v in val_loader:
                    
                        self.train(False)
@@ -191,6 +191,7 @@ class LwF(nn.Module):
                                 target_v = torch.cat((q_val_i[:, :self.n_known], labels_hot_v[:, self.n_known:self.n_classes]), dim=1)
                                 val_loss = self.dist_loss(out_v, target_v).item()
                                 
+                self.features_extractor.train(True)                
                 self.train(True) 
                                 
                 #avg_val_loss = val_loss / float(len(val_loader.dataset))
