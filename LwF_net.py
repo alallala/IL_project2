@@ -180,7 +180,7 @@ class LwF(nn.Module):
                        labels_v = Variable(seen_labels_v).to(DEVICE)
                        labels_hot_v =torch.eye(self.n_classes)[labels_v]
                        labels_hot_v = labels_hot_v.to(DEVICE)
-                       out = self(inputs)
+                       out = self(inputs_v)
                         
                        if self.n_known <= 0:
                             
