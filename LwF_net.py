@@ -189,12 +189,12 @@ class LwF(nn.Module):
                        else:
                                 q_val_i = q_val[indexes_v]
                                 target_v = torch.cat((q_val_i[:, :self.n_known], labels_hot_v[:, self.n_known:self.n_classes]), dim=1)
-                                val_loss = self.dist_loss(out_v, target_v).item()
+                                val_loss += self.dist_loss(out_v, target_v).item()* inputs_v.size(0)
                                 
                 self.features_extractor.train(True)                
                 self.train(True) 
                                 
-                #avg_val_loss = val_loss / float(len(val_loader.dataset))
+                avg_val_loss = val_loss / float(len(val_loader.dataset))
             
                         
             ''' accuracy = validate(self, val_loader, map_reverse)
