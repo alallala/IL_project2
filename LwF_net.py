@@ -104,9 +104,9 @@ class LwF(nn.Module):
             q = Variable(q).cuda()
             
          
-            for images,labels,indexes in val_loader:
-                images = Variable(images).cuda()
-                indexes = indexes.cuda()
+            for images_v,labels_v,indexes_v in val_loader:
+                images = Variable(images_v).cuda()
+                indexes = indexes_v.cuda()
                 g_val = torch.sigmoid(self.features_extractor.forward(images))
                 #g = self.forward(images)
                 q_val[indexes] = g_val.data
@@ -171,10 +171,11 @@ class LwF(nn.Module):
                 loss.backward()
                 optimizer.step()
                 
-                for inputs, labels, indexes in val_loader:
-                    
+                for inputs_v, labels_v, indexes_v in val_loader:
+                   
                        self.train(False)
-                       inputs, indexes = inputs.to(DEVICE), indexes.to(DEVICE)
+                       inputs, indexes = inputs_v.to(DEVICE), indexes_v.to(DEVICE)
+                       lebels = labels_v.to(DEVICE)
                        seen_labels = torch.LongTensor([class_map[label] for label in labels.numpy()])
                        labels = Variable(seen_labels).to(DEVICE)
                        labels_hot=torch.eye(self.n_classes)[labels]
